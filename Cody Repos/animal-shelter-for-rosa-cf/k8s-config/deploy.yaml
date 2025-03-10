@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: animal-shelter-for-rosa-cf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: animal-shelter-for-rosa-cf
+  template:
+    metadata:
+      labels:
+        app: animal-shelter-for-rosa-cf
+    spec:
+      containers:
+      - name: animal-shelter-for-rosa-cf-container
+        image: registry.gitlab.galvanize.com/cohorts/ent/sf/cse-rosa/cse-rosa-2025-02-24/student-work/cody-ferguson/animal-shelter-for-rosa-cf:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: animal-shelter-for-rosa-cf
+        - secretRef:
+            name: animal-shelter-for-rosa-cf
+      imagePullSecrets:
+      - name: gitlab-token

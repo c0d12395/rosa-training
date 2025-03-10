@@ -1,0 +1,43 @@
+include:
+  - project: 'cohorts/ent/sf/cse-rosa/cse-rosa-2025-02-24/source-repos/pipeline-templates-unit/templates'
+    file: 'kaniko.gitlab-ci.yml'
+
+stages:
+  - build
+  - test
+  - package
+  - docker
+
+cache:
+  key: maven-cache
+  paths:
+    - ~/.m2/repository
+
+build:
+  image: eclipse-temurin:17-alpine
+  stage: build
+  script:
+    - ./mvnw clean compile
+  artifacts:
+    paths:
+      - target/
+
+test:
+  image: eclipse-temurin:17-alpine
+  stage: test
+  dependencies:
+    - build
+  script:
+    - ./mvnw test
+
+package:
+  image: eclipse-temurin:17-alpine
+  stage: package
+  dependencies:
+    - build
+  script:
+    - ./mvnw package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 7 days

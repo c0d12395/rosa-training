@@ -1,0 +1,5 @@
+include:
+  - project: 'cohorts/ent/sf/cse-rosa/cse-rosa-2025-02-24/source-repos/pipeline-templates-unit/templates'
+    file: 'Security/SAST.gitlab-ci.yml'
+semgrep-sast-project:
+  extends: semgrep-sast

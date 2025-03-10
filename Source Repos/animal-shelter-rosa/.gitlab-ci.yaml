@@ -1,0 +1,62 @@
+stages:
+  - build
+  - test
+  - package
+  - docker
+
+include:
+  - remote: https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Jobs/SAST.gitlab-ci.yml
+  - project: 'cohorts/ent/sf/cse-rosa/cse-rosa-2024-01-27/source-repos/pipeline-templates-unit/templates'
+    file: 'kaniko.gitlab-ci.yml'
+
+cache:
+  key: maven-cache
+  paths:
+    - .m2/repository
+  policy: pull-push
+
+build:
+  image: amazoncorretto:17-alpine3.19 
+  stage: build
+  script:
+    - ./mvnw clean compile -Dmaven.repo.local=.m2/repository
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 week
+  # cache:
+  #   key: maven-cache
+  #   paths:
+  #     - .m2/repository
+  #   policy: push 
+
+test:
+  image: amazoncorretto:17-alpine3.19
+  stage: test
+  allow_failure: true
+  dependencies:
+    - build
+  script:
+    - ./mvnw test -Dmaven.repo.local=.m2/repository
+  # cache:
+  #   key: maven-cache
+  #   paths:
+  #     - .m2/repository
+  #   policy: pull
+
+package:
+  image: eclipse-temurin:17-alpine
+  stage: package
+  dependencies:
+    - build
+  script:
+    - ./mvnw package -DskipTests -Dmaven.repo.local=.m2/repository
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 7 days
+  # cache:
+  #   key: maven-cache
+  #   paths:
+  #     - .m2/repository
+  #   policy: pull

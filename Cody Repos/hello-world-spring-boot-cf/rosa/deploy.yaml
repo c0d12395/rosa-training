@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-spring-boot-cf-deployment
+  namespace: cse-cody-ferguson
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-world-spring-boot-cf-app
+  template:
+    metadata:
+      labels:
+        app: hello-world-spring-boot-cf-app
+    spec:
+      containers:
+      - name: hello-world-spring-boot-cf-container
+        image: registry.gitlab.galvanize.com/cohorts/ent/sf/cse-rosa/cse-rosa-2025-02-24/student-work/cody-ferguson/hello-world-spring-boot-cf:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"

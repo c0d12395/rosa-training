@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: animal-shelter-for-rosa-cf-service
+  namespace: cse-cody-ferguson
+spec:
+  selector:
+    app: animal-shelter-for-rosa-cf-app  # Matches the label in deploy.yaml
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP

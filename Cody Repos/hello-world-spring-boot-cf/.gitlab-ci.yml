@@ -1,0 +1,102 @@
+include:
+  - local: 'sast-remote.yml'
+  - local: 'sast-instance.yml'
+  - local: 'sast-project.yml'
+  - project: 'cohorts/ent/sf/cse-rosa/cse-rosa-2025-02-24/source-repos/pipeline-templates-unit/templates'
+    file: 'kaniko.gitlab-ci.yml'
+  - project: 'cohorts/ent/sf/cse-rosa/cse-rosa-2025-02-24/source-repos/pipeline-templates-unit/templates'
+    file: 'argocd-deploy.gitlab-ci.yml'
+
+default:
+  image: amazoncorretto:17-alpine
+
+variables:
+  APPLICATION_NAME: "hello-world-spring-boot-cf"
+  CONFIG_DIR: "rosa"
+  TARGET_NAMESPACE: "cse-cody-ferguson"
+  SYNC_POLICY: "auto"
+
+cache:
+  key: maven-cache
+  paths:
+    - ~/.m2/repository
+
+stages:
+  - build
+  - test 
+  - package
+  - docker
+  - deploy
+
+build-job:
+  stage: build
+  script:
+    - ./mvnw clean compile
+  artifacts:
+    paths:
+      - target/
+  rules:
+    - changes:
+      - src/**/*
+
+test-job:
+  stage: test
+  dependencies:
+    - build-job
+  script:
+    - ./mvnw test
+  artifacts:
+    paths:
+      - build/test-results/test/TEST*.xml
+      - build/reports/tests/test
+  rules:
+    - changes:
+      - src/**/*
+  # allow_failure: true
+
+semgrep-sast:
+  rules:
+    - changes:
+      - src/**/*
+
+semgrep-sast-instance:
+  rules:
+    - changes:
+      - src/**/*
+
+semgrep-sast-project:
+  rules:
+    - changes:
+      - src/**/*
+
+semgrep-sast-remote:
+  rules:
+    - changes:
+      - src/**/*
+
+package-job:
+  stage: package
+  dependencies:
+    - test-job
+  script:
+    - ./mvnw package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+  rules:
+    - changes:
+      - src/**/*
+
+docker:
+  rules:
+    - changes:
+      - src/**/*
+      - Dockerfile
+
+argo-sync:
+  when: always
+  rules:
+    - changes:
+      - src/**/*
+      - Dockerfile
+      - rosa/**/*

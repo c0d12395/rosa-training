@@ -1,0 +1,4 @@
+include:
+  - remote: https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Jobs/SAST.gitlab-ci.yml
+semgrep-sast-remote:
+  extends: semgrep-sast

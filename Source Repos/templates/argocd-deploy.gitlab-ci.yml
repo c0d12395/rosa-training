@@ -1,0 +1,53 @@
+stages:
+    - deploy
+
+variables:
+  TEMPLATES_REPO: "https://gitlab.galvanize.com/galvanize-it/curricula/ent/devops/pipeline-templates/code/templates.git"
+  CLONE_DIR: "$CI_PROJECT_DIR/templates"
+
+load-scripts:
+  image: alpine/git:latest
+  stage: .pre
+  script:
+    - echo "Cloning the templates repository..."
+    - git clone --depth=1 "https://oauth2:${GITLAB_TOKEN}@gitlab.galvanize.com/galvanize-it/curricula/ent/devops/pipeline-templates/code/templates.git" "$CLONE_DIR"
+    - echo "Templates repository cloned into $CLONE_DIR"
+    - mkdir -p "$CI_PROJECT_DIR/bin"
+    - cp "$CLONE_DIR/bin/"* "$CI_PROJECT_DIR/bin/"
+    - chmod +x "$CI_PROJECT_DIR/bin/"*
+  artifacts:
+    paths:
+      - bin/
+
+argo-create:
+  image: argoproj/argocd
+  stage: deploy
+  script:
+    - echo "Creating ArgoCD repository and application..."
+    - "bin/manage-argo-app.sh"
+  dependencies:
+    - load-scripts
+  when: manual
+
+argo-sync:
+  image: argoproj/argocd
+  stage: deploy
+  script:
+    - echo "Syncing ArgoCD App"
+    - "$CI_PROJECT_DIR/bin/sync-argo-app.sh"
+  dependencies:
+    - load-scripts
+    - argo-create
+  when: manual
+
+argo-delete:
+  image: argoproj/argocd
+  stage: deploy
+  script:
+    - echo "Deleting ArgoCD App"
+    - "$CI_PROJECT_DIR/bin/delete-argo-app.sh"
+  dependencies:
+    - load-scripts
+    - argo-create
+  when: delayed
+  start_in: 24 hours

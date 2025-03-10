@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-autos-for-rosa-cf-deployment
+  namespace: cse-cody-ferguson
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: simple-autos-for-rosa-cf-app
+  template:
+    metadata:
+      labels:
+        app: simple-autos-for-rosa-cf-app
+    spec:
+      containers:
+      - name: simple-autos-for-rosa-cf-container
+        image: registry.gitlab.galvanize.com/cohorts/ent/sf/cse-rosa/cse-rosa-2025-02-24/student-work/cody-ferguson/simple-autos-for-rosa-cf:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: simple-autos-for-rosa-cf-db-credentials
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
