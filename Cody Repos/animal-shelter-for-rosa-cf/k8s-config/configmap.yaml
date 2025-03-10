@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: animal-shelter-for-rosa-cf
 data:
-  DB_HOST: "postgres.galvanizelabs.net"
-  DB_PORT: "5432"
-  SPRING_PROFILES_ACTIVE: "default"
+  DB_HOST: ""
+  DB_PORT: ""
+  SPRING_PROFILES_ACTIVE: ""
